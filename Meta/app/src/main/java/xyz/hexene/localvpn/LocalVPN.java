@@ -16,14 +16,15 @@
 
 package xyz.hexene.localvpn;
 
+import Meta.homeActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.VpnService;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
@@ -52,6 +53,7 @@ public class LocalVPN extends ActionBarActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_local_vpn);
+        //setContentView(R.layout.activity_home);
         final Button vpnButton = (Button)findViewById(R.id.vpn);
         vpnButton.setOnClickListener(new View.OnClickListener()
         {
@@ -69,8 +71,9 @@ public class LocalVPN extends ActionBarActivity
     private void startVPN()
     {
         Intent vpnIntent = VpnService.prepare(this);
-        if (vpnIntent != null)
+        if (vpnIntent != null) {
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
+        }
         else
             onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null);
     }
@@ -84,6 +87,8 @@ public class LocalVPN extends ActionBarActivity
             waitingForVPNStart = true;
             startService(new Intent(this, LocalVPNService.class));
             enableButton(false);
+            Intent newWin = new Intent(this, homeActivity.class);
+            startActivity(newWin);
         }
     }
 
