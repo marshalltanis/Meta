@@ -15,4 +15,10 @@
         android:background="#a9a9a9"
         design:menu="@menu/botmen"
         />
+    <com.jjoe64.graphview.GraphView
+        android:layout_width="match_parent"
+        android:layout_height="200dip"
+        android:layout_centerInParent="true"
+        android:id="@+id/graph"/>
+
 </RelativeLayout>
