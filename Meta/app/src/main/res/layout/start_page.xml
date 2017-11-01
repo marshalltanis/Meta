@@ -11,5 +11,21 @@
     tools:context=".LocalVPN"
     android:background="@drawable/meta">
 
-    </RelativeLayout>
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/navBar"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        design:itemTextColor="@android:color/black"
+        android:background="#a9a9a9"
+        design:menu="@menu/botmen"
+        />
+    <FrameLayout
+        android:id="@+id/fragLay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/navBar"
+        >
 
+    </FrameLayout>
+</RelativeLayout>

@@ -16,7 +16,7 @@
 
 package xyz.hexene.localvpn;
 
-import Meta.homeActivity;
+import Meta.MainActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -87,7 +87,7 @@ public class LocalVPN extends ActionBarActivity
             waitingForVPNStart = true;
             startService(new Intent(this, LocalVPNService.class));
             enableButton(false);
-            Intent newWin = new Intent(this, homeActivity.class);
+            Intent newWin = new Intent(this, MainActivity.class);
             startActivity(newWin);
         }
     }

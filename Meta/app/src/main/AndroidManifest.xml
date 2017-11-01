@@ -16,30 +16,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="Meta.homeActivity"
+            android:name="Meta.MainActivity"
             android:label="Meta" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="Meta.analyzeActivity"
-            android:label="Meta" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="Meta.settingsActivity"
-            android:label="Meta" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
         <service
             android:name=".LocalVPNService"
             android:enabled="true"
