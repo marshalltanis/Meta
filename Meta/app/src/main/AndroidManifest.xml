@@ -8,7 +8,7 @@
         android:label="Meta"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".LocalVPN"
+            android:name="xyz.hexene.xyz.hexene.localvpn.LocalVPN"
             android:label="Meta" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name=".LocalVPNService"
+            android:name="xyz.hexene.xyz.hexene.localvpn.LocalVPNService"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_VPN_SERVICE">

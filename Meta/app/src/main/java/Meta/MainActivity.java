@@ -1,6 +1,6 @@
 package Meta;
 
-
+import xyz.hexene.xyz.hexene.localvpn.*;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -11,6 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import xyz.hexene.localvpn.R;
 
@@ -68,5 +71,14 @@ public class MainActivity extends AppCompatActivity{
             swap.commit();
         }
 
+    }
+    public void showInfo(View v){
+        Button show = (Button) findViewById(R.id.button);
+        TextView info = (TextView) findViewById(R.id.myView);
+        LocalVPN cont = new LocalVPN();
+        cont.RefreshList(v);
+        if(show.getText().equals("Show Info")){
+            show.setText("Refresh Info");
+        }
     }
 }

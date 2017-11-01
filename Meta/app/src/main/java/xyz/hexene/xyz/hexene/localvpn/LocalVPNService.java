@@ -14,7 +14,7 @@
 ** limitations under the License.
 */
 
-package xyz.hexene.localvpn;
+package xyz.hexene.xyz.hexene.localvpn;
 
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -35,10 +35,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import xyz.hexene.localvpn.R;
+
 public class LocalVPNService extends VpnService
 {
     private static final String TAG = LocalVPNService.class.getSimpleName();
-    private static final String VPN_ADDRESS = "10.0.0.2"; // Only IPv4 support for now
+    private static final String VPN_ADDRESS = "10.0.0.7"; // Only IPv4 support for now
     private static final String VPN_ROUTE = "0.0.0.0"; // Intercept everything
 
     public static final String BROADCAST_VPN_STATE = "xyz.hexene.localvpn.VPN_STATE";
@@ -72,9 +74,9 @@ public class LocalVPNService extends VpnService
             networkToDeviceQueue = new ConcurrentLinkedQueue<>();
 
             executorService = Executors.newFixedThreadPool(5);
-            executorService.submit(new UDPInput(networkToDeviceQueue, udpSelector));
+            executorService.submit(new UDPInput(networkToDeviceQueue, udpSelector, getApplicationContext()));
             executorService.submit(new UDPOutput(deviceToNetworkUDPQueue, udpSelector, this));
-            executorService.submit(new TCPInput(networkToDeviceQueue, tcpSelector));
+            executorService.submit(new TCPInput(networkToDeviceQueue, tcpSelector, getApplicationContext()));
             executorService.submit(new TCPOutput(deviceToNetworkTCPQueue, networkToDeviceQueue, tcpSelector, this));
             executorService.submit(new VPNRunnable(vpnInterface.getFileDescriptor(),
                     deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, networkToDeviceQueue));
@@ -195,11 +197,11 @@ public class LocalVPNService extends VpnService
                         dataSent = true;
                         bufferToNetwork.flip();
                         Packet packet = new Packet(bufferToNetwork);
-                        if (packet.isUDP())
-                        {
-                            deviceToNetworkUDPQueue.offer(packet);
-                        }
-                        else if (packet.isTCP())
+//                        if (packet.isUDP())
+//                        {
+//                            deviceToNetworkUDPQueue.offer(packet);
+//                        }
+                        if (packet.isTCP())
                         {
                             deviceToNetworkTCPQueue.offer(packet);
                         }
