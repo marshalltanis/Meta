@@ -14,9 +14,9 @@
         app:showAsAction="ifRoom"
         />
     <item
-        android:id="@+id/setting"
+        android:id="@+id/startVpnButton"
         android:icon="@drawable/ic_settings_applications_black_24dp"
-        android:title="Settings"
+        android:title="Start VPN"
         app:showAsAction="ifRoom"
         />
 </menu>

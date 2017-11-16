@@ -25,16 +25,25 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.start_page);
         setUpHome();
+
+
     }
 
-    private void startVPN(){
-
+    public void startVPN(){
         Intent vpnIntent = VpnService.prepare(this);
         if (vpnIntent != null)
             startActivityForResult(vpnIntent, 0);
         else
             onActivityResult(0, RESULT_OK, null);
 
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 0 && resultCode == RESULT_OK){
+            Log.w("onActivityResult", "About to start vpn!!!");
+            startService(new Intent(this, VPN.class));
+        }
     }
 
     protected void setUpHome(){
@@ -63,10 +72,8 @@ public class MainActivity extends AppCompatActivity{
                 fragManage(current);
                 Log.w("Switch", "Switched to analyze");
                 break;
-            case R.id.setting:
-                current = new settingsFragment();
-                fragManage(current);
-                Log.w("Switch", "Switched to setting");
+            case R.id.startVpnButton:
+                startVPN();
                 break;
             default:
                 current = new homeFragment();
@@ -83,12 +90,5 @@ public class MainActivity extends AppCompatActivity{
             swap.commit();
         }
 
-    }
-    public void showInfo(View v){
-        Button show = (Button) findViewById(R.id.button);
-        TextView info = (TextView) findViewById(R.id.myView);
-        if(show.getText().equals("Show Info")){
-            show.setText("Refresh Info");
-        }
     }
 }
