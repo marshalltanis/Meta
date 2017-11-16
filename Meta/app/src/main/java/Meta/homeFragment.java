@@ -7,7 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import xyz.hexene.localvpn.R;
+import com.Meta.R;
+
 
 public class homeFragment extends Fragment {
     @Nullable

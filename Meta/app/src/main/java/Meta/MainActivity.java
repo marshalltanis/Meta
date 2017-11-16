@@ -1,9 +1,10 @@
 package Meta;
 
-import xyz.hexene.xyz.hexene.localvpn.*;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
+import android.net.VpnService;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -15,14 +16,25 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import xyz.hexene.localvpn.R;
+import com.Meta.R;
 
 public class MainActivity extends AppCompatActivity{
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.start_page);
         setUpHome();
+    }
+
+    private void startVPN(){
+
+        Intent vpnIntent = VpnService.prepare(this);
+        if (vpnIntent != null)
+            startActivityForResult(vpnIntent, 0);
+        else
+            onActivityResult(0, RESULT_OK, null);
+
     }
 
     protected void setUpHome(){
@@ -75,8 +87,6 @@ public class MainActivity extends AppCompatActivity{
     public void showInfo(View v){
         Button show = (Button) findViewById(R.id.button);
         TextView info = (TextView) findViewById(R.id.myView);
-        LocalVPN cont = new LocalVPN();
-        cont.RefreshList(v);
         if(show.getText().equals("Show Info")){
             show.setText("Refresh Info");
         }

@@ -12,7 +12,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import xyz.hexene.localvpn.R;
+import com.Meta.R;
+
 
 public class settingsFragment extends Fragment{
     @Nullable

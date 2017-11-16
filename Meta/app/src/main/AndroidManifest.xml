@@ -1,20 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="xyz.hexene.localvpn" >
+          package="com.Meta" >
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_home_black_24dp"
         android:label="Meta"
         android:theme="@style/AppTheme" >
-        <activity
-            android:name="xyz.hexene.xyz.hexene.localvpn.LocalVPN"
-            android:label="Meta" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity
             android:name="Meta.MainActivity"
             android:label="Meta" >
@@ -23,16 +15,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service
-            android:name="xyz.hexene.xyz.hexene.localvpn.LocalVPNService"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.BIND_VPN_SERVICE">
-
-            <intent-filter>
-                <action android:name="android.net.VpnService"/>
-            </intent-filter>
-        </service>
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
 

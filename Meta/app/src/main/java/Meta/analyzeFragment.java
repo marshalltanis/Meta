@@ -12,11 +12,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.Meta.R;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
-import xyz.hexene.localvpn.R;
+
 
 public class analyzeFragment extends Fragment {
     @Nullable
