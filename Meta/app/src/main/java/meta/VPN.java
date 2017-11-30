@@ -8,7 +8,9 @@ import android.util.Log;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -96,7 +98,7 @@ public class VPN extends VpnService {
                 ByteBuffer dataFromNetwork = null;
                 boolean dataSent = true;
                 boolean dataReceived = true;
-
+                DatagramChannel destOut = DatagramChannel.open();
                 while(!Thread.interrupted()){
 
                     /* Try writing from device to network */
@@ -112,19 +114,32 @@ public class VPN extends VpnService {
                         Log.w("Bytes", "" + bytesRead);
                         dataSent = true;
                         dataFromDevice.flip();
-
                         Packet packet = new Packet(dataFromDevice);
-
                         Log.w("Packet", "" + packet.toString());
-
-                        bytesRead = vpnOut.write(dataFromDevice);
-                        dataFromDevice.flip();
-                        byte[] bytes = new byte[dataFromDevice.remaining()];
-                        if(bytesRead > 0){
-
-                            dataFromDevice.get(bytes);
-                            Log.w("TAG", bytes.toString());
+                        int destPort = 4444;
+                        if(packet.isUDP()){
+                            destPort = packet.udpHeader.destinationPort;
                         }
+                        else{
+                            destPort = packet.tcpHeader.destinationPort;
+                        }
+                        try{
+                            destOut.connect(new InetSocketAddress(packet.ip4Header.destinationAddress, destPort));
+                        } catch (Exception e){
+                            Log.w("Error", e.toString());
+                        }
+                        //vpnService.protect(destOut);
+                        while(dataFromDevice.hasRemaining()){
+                            Log.w("Working", "Writing to network datagram channel: " + dataFromDevice.toString());
+                            int bytesWritten = destOut.write(dataFromDevice);
+                            Log.w("Working", "Bytes Written: " + bytesWritten);
+                        }
+                        ByteBufferPool.release(dataFromDevice);
+//                        try{
+//                            destOut.close();
+//                        }catch (Exception e){
+//                            Log.w("Error", e.toString());
+//                        }
                     } else {
                         dataSent = false;
                     }
