@@ -10,9 +10,22 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ *
+ *
+ *      FROM NETWORK =======> DEVICE
+ *                              ||
+ *                              ||
+ *                              ||
+ *                              ||
+ *                              \/
+ *                              VPN =======> TO NETWORK
+ *
+ */
 
 public class VPN extends VpnService {
 
@@ -23,14 +36,21 @@ public class VPN extends VpnService {
     private static ParcelFileDescriptor VPN_INTERFACE = null;
     private static boolean IS_RUNNING;
 
+    private ConcurrentLinkedQueue<ByteBuffer> NETWORK_TO_DEVICE_QUEUE;
+    private ConcurrentLinkedQueue<Packet> DEVICE_TO_NETWORK_QUEUE;
+
     @Override
     public void onCreate() {
         super.onCreate();
         Log.i("VPN.java", "In onCreate");
         IS_RUNNING = true;
         setUpVPN();
+
+        NETWORK_TO_DEVICE_QUEUE = new ConcurrentLinkedQueue<ByteBuffer>();
+
+
         ExecutorService executors = Executors.newFixedThreadPool(1);
-        executors.submit(new VPNRUN());
+        executors.submit(new VPNRUN(NETWORK_TO_DEVICE_QUEUE));
         Log.w("Tag", "Started");
     }
 
@@ -54,17 +74,29 @@ public class VPN extends VpnService {
     }
 
     private static class VPNRUN implements Runnable {
-        public VPNRUN(){}
+
+        private ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue;
+
+        public VPNRUN(ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue){
+
+            this.networkToDeviceQueue = networkToDeviceQueue;
+
+        }
+
         @Override
         public void run(){
             Log.i("SUCCESS", "STARTING VPN");
+
             FileChannel vpnIn = new FileInputStream(VPN_INTERFACE.getFileDescriptor()).getChannel();
             FileChannel vpnOut = new FileOutputStream(VPN_INTERFACE.getFileDescriptor()).getChannel();
+
             try{
+
                 ByteBuffer dataFromDevice = null;
                 ByteBuffer dataFromNetwork = null;
                 boolean dataSent = true;
                 boolean dataReceived = true;
+
                 while(!Thread.interrupted()){
 
                     /* Try writing from device to network */
@@ -78,7 +110,13 @@ public class VPN extends VpnService {
                     int bytesRead = vpnIn.read(dataFromDevice);
                     if(bytesRead > 0){
                         Log.w("Bytes", "" + bytesRead);
+                        dataSent = true;
                         dataFromDevice.flip();
+
+                        Packet packet = new Packet(dataFromDevice);
+
+                        Log.w("Packet", "" + packet.toString());
+
                         bytesRead = vpnOut.write(dataFromDevice);
                         dataFromDevice.flip();
                         byte[] bytes = new byte[dataFromDevice.remaining()];
