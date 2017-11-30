@@ -1,4 +1,4 @@
-package Meta;
+package meta;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -12,11 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
-import com.Meta.R;
 
 public class MainActivity extends AppCompatActivity{
 

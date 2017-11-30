@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.Meta" >
+          package="meta" >
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_home_black_24dp"
-        android:label="Meta"
+        android:label="meta"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="Meta.MainActivity"
+            android:name="meta.MainActivity"
             android:label="Meta" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -17,7 +17,7 @@
         </activity>
 
         <service
-            android:name="Meta.VPN"
+            android:name="meta.VPN"
             android:enabled="true"
             android:permission="android.permission.BIND_VPN_SERVICE">
 
