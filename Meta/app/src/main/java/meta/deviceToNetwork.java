@@ -25,6 +25,7 @@ public class deviceToNetwork implements Runnable {
             try{
                  bytesRead= vpnIn.read(newPack);
                 if(bytesRead > 0){
+                    newPack.flip();
                     Packet current = new Packet(newPack);
                     deviceToNetworkQueue.offer(current);
                     ByteBufferPool.release(newPack);
@@ -35,8 +36,6 @@ public class deviceToNetwork implements Runnable {
             } catch (Exception e){
                 Log.w("ERROR", e.toString());
             }
-
-
         }
     }
 }
