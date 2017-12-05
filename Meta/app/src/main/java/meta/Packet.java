@@ -49,6 +49,9 @@ public class Packet
         }
         this.backingBuffer = buffer;
     }
+    public Packet(Packet p){
+
+    }
 
     @Override
     public String toString()

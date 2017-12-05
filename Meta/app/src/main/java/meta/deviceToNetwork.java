@@ -28,7 +28,7 @@ public class deviceToNetwork implements Runnable {
                     newPack.flip();
                     Packet current = new Packet(newPack);
                     Log.i("Dest", current.ip4Header.destinationAddress.toString());
-                    Log.i("Dest", current.backingBuffer.toString());
+                    current.backingBuffer.flip();
                     deviceToNetworkQueue.offer(current);
                     ByteBufferPool.release(newPack);
                 }

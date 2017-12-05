@@ -13,14 +13,19 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 
 public class MainActivity extends AppCompatActivity{
-
+    public static ConcurrentLinkedQueue<String> handled;
+    private homeFragment home;
+    private analyzeFragment analyze;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.start_page);
         setUpHome();
+        handled = new ConcurrentLinkedQueue<String>();
 
 
     }
@@ -61,19 +66,22 @@ public class MainActivity extends AppCompatActivity{
     protected void selectScreen(@NonNull MenuItem item){
         int id = item.getItemId();
         item.setChecked(true);
-        Fragment current;
         switch(id){
-            case R.id.analyze:
-                current = new analyzeFragment();
-                fragManage(current);
-                Log.w("Switch", "Switched to analyze");
-                break;
+//            case R.id.analyze:
+//                if(analyze == null){
+//                    analyze = new analyzeFragment();
+//                }
+//                fragManage(analyze);
+//                Log.w("Switch", "Switched to analyze");
+//                break;
             case R.id.startVpnButton:
                 startVPN();
                 break;
             default:
-                current = new homeFragment();
-                fragManage(current);
+               if(home == null) {
+                   home = new homeFragment();
+               }
+                fragManage(home);
                 Log.w("Switch", "Switched to home");
                 break;
         }
@@ -83,6 +91,7 @@ public class MainActivity extends AppCompatActivity{
         if(fm != null){
             FragmentTransaction swap = fm.beginTransaction();
             swap.replace(R.id.fragLay, frag);
+            swap.addToBackStack(null);
             swap.commit();
         }
 

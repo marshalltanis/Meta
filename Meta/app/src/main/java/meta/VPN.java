@@ -15,15 +15,21 @@ import org.w3c.dom.Text;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -70,9 +76,9 @@ public class VPN extends VpnService {
         DEVICE_TO_NETWORK_QUEUE = new ConcurrentLinkedQueue<Packet>();
         open = new LinkedBlockingQueue<>();
 
-        try{
+        try {
             select = Selector.open();
-        }catch(Exception e){
+        } catch (Exception e) {
             Log.w("ERROR", e.toString());
         }
         ExecutorService executors = Executors.newFixedThreadPool(3);
@@ -109,12 +115,13 @@ public class VPN extends VpnService {
         private VPN vpn;
         private LinkedBlockingQueue<DatagramChannel> open;
         private HashMap<String, DatagramChannel> map;
+
         public VPNRUN(ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue,
                       ConcurrentLinkedQueue<Packet> deviceToNetworkQueue,
                       Selector select, HashMap<String,
-                      DatagramChannel> map,
+                DatagramChannel> map,
                       VPN vpn,
-                      LinkedBlockingQueue<DatagramChannel> open){
+                      LinkedBlockingQueue<DatagramChannel> open) {
             this.deviceToNetworkQueue = deviceToNetworkQueue;
             this.networkToDeviceQueue = networkToDeviceQueue;
             this.select = select;
@@ -124,66 +131,92 @@ public class VPN extends VpnService {
         }
 
         @Override
-        public void run(){
+        public void run() {
             Log.i("SUCCESS", "STARTING VPN");
 
             FileChannel vpnIn = new FileInputStream(VPN_INTERFACE.getFileDescriptor()).getChannel();
             FileChannel vpnOut = new FileOutputStream(VPN_INTERFACE.getFileDescriptor()).getChannel();
-
-            try{
+            try {
 
                 Packet packetFromDevice = null;
                 ByteBuffer dataFromNetwork = null;
                 boolean dataSent = true;
                 boolean dataReceived = true;
                 DatagramChannel destOut;
-                while(!Thread.interrupted()){
+                while (true) {
                     packetFromDevice = deviceToNetworkQueue.poll();
-                    if(packetFromDevice != null){
+                    if (packetFromDevice != null) {
                         byte[] current = new byte[10000];
                         packetFromDevice.backingBuffer.get(current);
                         Log.w("Working", "Writing to network datagram channel: " + current.toString());
                         destOut = map.get(packetFromDevice.ip4Header.destinationAddress.toString());
-                        if(destOut == null){
-                            destOut = DatagramChannel.open();
-                            int destPort = 4444;
-                            if(packetFromDevice.isUDP()){
-                                destPort = packetFromDevice.udpHeader.destinationPort;
+                        if (destOut == null) {
+                            try {
+                                destOut = DatagramChannel.open();
+                            } catch (Exception e) {
+                                Log.w("Error", e.toString());
                             }
-                            else if(packetFromDevice.isTCP()){
+                            int sourcePort = 9999;
+                            int destPort = 4444;
+                            if (packetFromDevice.isUDP()) {
+                                destPort = packetFromDevice.udpHeader.destinationPort;
+                                sourcePort = packetFromDevice.udpHeader.sourcePort;
+                            } else if (packetFromDevice.isTCP()) {
                                 destPort = packetFromDevice.tcpHeader.destinationPort;
+                                sourcePort = packetFromDevice.tcpHeader.sourcePort;
+                            }
+                            InetSocketAddress sa = new InetSocketAddress(getIPAddress(), sourcePort);
+                            try {
+                                destOut.socket().setReuseAddress(true);
+                                destOut.socket().bind(sa);
+                                Log.i("Success", "Bound IP address so listening");
+                            } catch (Exception e) {
+                                Log.w("Error", e.toString());
                             }
                             try {
-                                if(packetFromDevice.ip4Header.destinationAddress != null) {
+                                if (packetFromDevice.ip4Header.destinationAddress != null) {
                                     destOut.connect(new InetSocketAddress(packetFromDevice.ip4Header.destinationAddress, destPort));
                                     map.put(packetFromDevice.ip4Header.destinationAddress.toString(), destOut);
+                                    String newP = packetFromDevice.ip4Header.destinationAddress.toString();
                             /* This is to make sure selector only wakes up when there is a packet from the destination to us */
+                                    MainActivity.handled.offer(newP);
                                     packetFromDevice.swapSourceAndDestination();
                                     select.wakeup();
                                     destOut.configureBlocking(false);
                                     destOut.register(select, SelectionKey.OP_READ, packetFromDevice);
                                     open.put(destOut);
                                     vpn.protect(destOut.socket());
-                                    try {
-                                        int bytesWritten = destOut.write(packetFromDevice.backingBuffer);
-                                        Log.i("SUCCESS", "" + bytesWritten);
-                                    } catch (Exception e) {
-                                        Log.w("ERROR", e.toString());
-                                    }
+
                                 }
-                            }catch (Exception e){
+                            } catch (Exception e) {
                                 Log.w("ERROR", "Failed to connect");
                             }
 
                         }
+                        else {
+                            String newP = packetFromDevice.ip4Header.destinationAddress.toString();
+                            MainActivity.handled.offer(newP);
+                        }
+                        try {
+                            int bytesWritten = destOut.write(packetFromDevice.backingBuffer);
+                            Log.i("SUCCESS", "" + bytesWritten);
+                        } catch (Exception e) {
+                            Log.w("ERROR", e.toString());
+                        }
+                        ByteBufferPool.release(packetFromDevice.backingBuffer);
+
                     }
                     /* Try writing from network to device */
                     dataFromNetwork = networkToDeviceQueue.poll();
-                    if(dataFromNetwork != null) {
+                    if (dataFromNetwork != null) {
                         dataFromNetwork.flip();
                         int bytesWrote = 0;
                         //while (dataFromNetwork.hasRemaining()) {
-                        bytesWrote = vpnOut.write(dataFromNetwork);
+                        try {
+                            bytesWrote = vpnOut.write(dataFromNetwork);
+                        } catch (Exception e) {
+                            Log.w("Error", e.toString());
+                        }
                         //}
                         if (bytesWrote > 0) {
                             Log.w("TAG", "Wrote " + bytesWrote);
@@ -192,12 +225,28 @@ public class VPN extends VpnService {
                         }
                         ByteBufferPool.release(dataFromNetwork);
                     }
-
                 }
-            } catch (Exception e){
-                Log.w("Error" , e.toString());
+            } catch (Exception e) {
+                Log.w("Error", e.toString());
             }
         }
 
+        //http://stackoverflow.com/questions/6064510/how-to-get-ip-address-of-the-device
+        private static InetAddress getIPAddress() {
+            try {
+                List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+                for (NetworkInterface intf : interfaces) {
+                    List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
+                    for (InetAddress addr : addrs) {
+                        if (!addr.isLoopbackAddress() && addr instanceof Inet4Address) {
+                            return addr;
+                        }
+                    }
+                }
+            } catch (SocketException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 }

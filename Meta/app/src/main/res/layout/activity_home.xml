@@ -5,17 +5,12 @@
     tools:context="meta.MainActivity"
     android:background="@drawable/meta">
 
-    <Button
-        android:id="@+id/clear"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Clear List"
-       />
     <TextView
         android:id="@+id/myView"
-        android:layout_below="@+id/clear"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#FFFFFF"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:textColor="#ffffff"
+        />
     </RelativeLayout>
 
