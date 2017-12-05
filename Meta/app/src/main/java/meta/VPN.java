@@ -1,11 +1,17 @@
 package meta;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -15,10 +21,14 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  *
@@ -46,6 +56,8 @@ public class VPN extends VpnService {
     private Selector select;
     private ConcurrentLinkedQueue<ByteBuffer> NETWORK_TO_DEVICE_QUEUE;
     private ConcurrentLinkedQueue<Packet> DEVICE_TO_NETWORK_QUEUE;
+    private LinkedBlockingQueue<DatagramChannel> open;
+
 
     @Override
     public void onCreate() {
@@ -56,6 +68,7 @@ public class VPN extends VpnService {
         channelMap = new HashMap<String, DatagramChannel>();
         NETWORK_TO_DEVICE_QUEUE = new ConcurrentLinkedQueue<ByteBuffer>();
         DEVICE_TO_NETWORK_QUEUE = new ConcurrentLinkedQueue<Packet>();
+        open = new LinkedBlockingQueue<>();
 
         try{
             select = Selector.open();
@@ -63,9 +76,9 @@ public class VPN extends VpnService {
             Log.w("ERROR", e.toString());
         }
         ExecutorService executors = Executors.newFixedThreadPool(3);
-        executors.submit(new VPNRUN(NETWORK_TO_DEVICE_QUEUE, DEVICE_TO_NETWORK_QUEUE, select, channelMap, this));
+        executors.submit(new VPNRUN(NETWORK_TO_DEVICE_QUEUE, DEVICE_TO_NETWORK_QUEUE, select, channelMap, this, open));
         executors.submit(new deviceToNetwork(DEVICE_TO_NETWORK_QUEUE, VPN_INTERFACE));
-        executors.submit(new networkToDevice(NETWORK_TO_DEVICE_QUEUE, select));
+        executors.submit(new networkToDevice(NETWORK_TO_DEVICE_QUEUE, select, open));
         Log.w("Tag", "Started");
     }
 
@@ -94,13 +107,20 @@ public class VPN extends VpnService {
         private ConcurrentLinkedQueue<Packet> deviceToNetworkQueue;
         private Selector select;
         private VPN vpn;
+        private LinkedBlockingQueue<DatagramChannel> open;
         private HashMap<String, DatagramChannel> map;
-        public VPNRUN(ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue, ConcurrentLinkedQueue<Packet> deviceToNetworkQueue, Selector select, HashMap<String, DatagramChannel> map, VPN vpn){
+        public VPNRUN(ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue,
+                      ConcurrentLinkedQueue<Packet> deviceToNetworkQueue,
+                      Selector select, HashMap<String,
+                      DatagramChannel> map,
+                      VPN vpn,
+                      LinkedBlockingQueue<DatagramChannel> open){
             this.deviceToNetworkQueue = deviceToNetworkQueue;
             this.networkToDeviceQueue = networkToDeviceQueue;
             this.select = select;
             this.map = map;
             this.vpn = vpn;
+            this.open = open;
         }
 
         @Override
@@ -142,6 +162,7 @@ public class VPN extends VpnService {
                                     select.wakeup();
                                     destOut.configureBlocking(false);
                                     destOut.register(select, SelectionKey.OP_READ, packetFromDevice);
+                                    open.put(destOut);
                                     vpn.protect(destOut.socket());
                                     try {
                                         int bytesWritten = destOut.write(packetFromDevice.backingBuffer);

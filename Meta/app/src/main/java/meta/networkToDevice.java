@@ -2,6 +2,8 @@ package meta;
 
 import android.util.Log;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
@@ -9,13 +11,16 @@ import java.nio.channels.Selector;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class networkToDevice implements Runnable {
         private ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue;
         private Selector selector;
-        public networkToDevice(ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue, Selector selector) {
+        private LinkedBlockingQueue<DatagramChannel> open;
+        public networkToDevice(ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue, Selector selector, LinkedBlockingQueue<DatagramChannel> open) {
             this.networkToDeviceQueue = networkToDeviceQueue;
             this.selector = selector;
+            this.open = open;
         }
         @Override
         public void run() {
@@ -23,12 +28,15 @@ public class networkToDevice implements Runnable {
             try {
                 while (!us.isInterrupted()) {
                     /* Number of datagram channels ready to be read from */
+                    selector.wakeup();
                     int numChannels = selector.select();
-                    Log.i("Channels", numChannels + "ready");
+                    //DatagramChannel available = open.take();
+                    //Log.i("Channels", numChannels + "ready");
                     if (numChannels == 0) {
                         us.sleep(10);
                         continue;
                     }
+                    Log.w("Success", "THIS IS WORKING AND NOT FUCKED UP");
                     /* Get all channels that are ready */
                     Set<SelectionKey> selectionKeys = selector.selectedKeys();
                     Iterator<SelectionKey> keyIterator = selectionKeys.iterator();
