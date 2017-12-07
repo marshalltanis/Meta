@@ -13,11 +13,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class networkToDevice implements Runnable {
+public class NetworkToDevice implements Runnable {
         private ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue;
         private Selector selector;
         private LinkedBlockingQueue<DatagramChannel> open;
-        public networkToDevice(ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue, Selector selector, LinkedBlockingQueue<DatagramChannel> open) {
+        public NetworkToDevice(ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue, Selector selector, LinkedBlockingQueue<DatagramChannel> open) {
             this.networkToDeviceQueue = networkToDeviceQueue;
             this.selector = selector;
             this.open = open;

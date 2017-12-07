@@ -14,7 +14,7 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 
 
 
-public class analyzeFragment extends Fragment {
+public class AnalysisFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

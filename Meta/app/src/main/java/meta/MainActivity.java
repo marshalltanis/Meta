@@ -18,8 +18,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MainActivity extends AppCompatActivity{
     public static ConcurrentLinkedQueue<String> handled;
-    private homeFragment home;
-    private analyzeFragment analyze;
+    private HomeFragment home;
+    private AnalysisFragment analyze;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity{
         switch(id){
 //            case R.id.analyze:
 //                if(analyze == null){
-//                    analyze = new analyzeFragment();
+//                    analyze = new AnalysisFragment();
 //                }
 //                fragManage(analyze);
 //                Log.w("Switch", "Switched to analyze");
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity{
                 break;
             default:
                if(home == null) {
-                   home = new homeFragment();
+                   home = new HomeFragment();
                }
                 fragManage(home);
                 Log.w("Switch", "Switched to home");

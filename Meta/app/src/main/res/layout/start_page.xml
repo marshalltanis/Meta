@@ -8,7 +8,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    android:background="@drawable/meta">
+    android:background="#B8B8B8">
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navBar"
@@ -17,21 +17,13 @@
         android:layout_height="wrap_content"
         design:itemTextColor="@android:color/black"
         android:background="#a9a9a9"
-        design:menu="@menu/botmen"
-        />
-    <!--<Button-->
-        <!--android:id="@+id/startVpnButton"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="Start VPN"-->
-        <!--android:layout_centerInParent="true"-->
-        <!--android:onClick="startVpn"-->
-        <!--/>-->
+        design:menu="@menu/botmen"/>
+
     <FrameLayout
         android:id="@+id/fragLay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/navBar"
-        >
+        android:layout_above="@id/navBar">
     </FrameLayout>
+
 </RelativeLayout>

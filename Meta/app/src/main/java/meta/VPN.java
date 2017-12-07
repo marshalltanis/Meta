@@ -1,17 +1,10 @@
 package meta;
 
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
-import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -25,12 +18,9 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -83,8 +73,8 @@ public class VPN extends VpnService {
         }
         ExecutorService executors = Executors.newFixedThreadPool(3);
         executors.submit(new VPNRUN(NETWORK_TO_DEVICE_QUEUE, DEVICE_TO_NETWORK_QUEUE, select, channelMap, this, open));
-        executors.submit(new deviceToNetwork(DEVICE_TO_NETWORK_QUEUE, VPN_INTERFACE));
-        executors.submit(new networkToDevice(NETWORK_TO_DEVICE_QUEUE, select, open));
+        executors.submit(new DeviceToNetwork(DEVICE_TO_NETWORK_QUEUE, VPN_INTERFACE));
+        //executors.submit(new NetworkToDevice(NETWORK_TO_DEVICE_QUEUE, select, open));
         Log.w("Tag", "Started");
     }
 
@@ -177,9 +167,7 @@ public class VPN extends VpnService {
                                 if (packetFromDevice.ip4Header.destinationAddress != null) {
                                     destOut.connect(new InetSocketAddress(packetFromDevice.ip4Header.destinationAddress, destPort));
                                     map.put(packetFromDevice.ip4Header.destinationAddress.toString(), destOut);
-                                    String newP = packetFromDevice.ip4Header.destinationAddress.toString();
                             /* This is to make sure selector only wakes up when there is a packet from the destination to us */
-                                    MainActivity.handled.offer(newP);
                                     packetFromDevice.swapSourceAndDestination();
                                     select.wakeup();
                                     destOut.configureBlocking(false);
@@ -193,10 +181,7 @@ public class VPN extends VpnService {
                             }
 
                         }
-                        else {
-                            String newP = packetFromDevice.ip4Header.destinationAddress.toString();
-                            MainActivity.handled.offer(newP);
-                        }
+
                         try {
                             int bytesWritten = destOut.write(packetFromDevice.backingBuffer);
                             Log.i("SUCCESS", "" + bytesWritten);

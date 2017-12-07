@@ -9,10 +9,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class deviceToNetwork implements Runnable {
+public class DeviceToNetwork implements Runnable {
     private ConcurrentLinkedQueue<Packet> deviceToNetworkQueue;
     private FileChannel vpnIn;
-    public deviceToNetwork(ConcurrentLinkedQueue<Packet> d2n, ParcelFileDescriptor vpnIn){
+    public DeviceToNetwork(ConcurrentLinkedQueue<Packet> d2n, ParcelFileDescriptor vpnIn){
         this.deviceToNetworkQueue = d2n;
         this.vpnIn = new FileInputStream(vpnIn.getFileDescriptor()).getChannel();
     }
@@ -30,6 +30,8 @@ public class deviceToNetwork implements Runnable {
                     Log.i("Dest", current.ip4Header.destinationAddress.toString());
                     current.backingBuffer.flip();
                     deviceToNetworkQueue.offer(current);
+                    String newP = current.ip4Header.destinationAddress.toString();
+                    MainActivity.handled.offer(newP);
                     ByteBufferPool.release(newPack);
                 }
                 else {

@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class homeFragment extends Fragment {
+public class HomeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,7 +56,7 @@ public class homeFragment extends Fragment {
                     continue;
                 }
                // if(displayed.get(p) == null){
-                    String display = "New packet heading towards: " + p + "\n";
+                    String display = "Outbound ----> " + p.substring(1) + "\n";
                     Log.i("TEXT", "Setting text in textview");
                     displayed.put(p, "HANDLED");
                     scroll.append(display);
